@@ -27,8 +27,16 @@ class Component{
             let value = value(this.state)
         }
 
-        const updateGlobal = this.options.globalState
-        const updateFileSystem = this.options.fsState
+        let updateGlobal
+        let updateFileSystem
+
+        if (this.options){
+            updateGlobal = this.options.globalState !== undefined
+            updateFileSystem = this.options.fsState !== undefined
+        } else {
+            updateGlobal = false
+            updateFileSystem = false
+        }
         const fsState = {}
         if (updateFileSystem){
             this.options.fsState.options.include.forEach((object)=>{

@@ -15,7 +15,7 @@ const use = (Comp)=>{
 
     if (components[comp.componentName]) throw new Error(`Component name '${comp.componentName}' is already used. Duplicate names not allowed`)
 
-    if (comp.options.fsState){
+    if (comp.options && comp.options.fsState){
         // Load initial fsStore state into component or generate from default state
         const fsState = store.get(comp.componentName)
         if (fsState) comp.state = {...comp.state, ...fsState}
@@ -28,11 +28,13 @@ const use = (Comp)=>{
         }
     }
 
-    // load initial global state
-    comp.options.globalState.options.include.forEach(object=>{
-        if (!global[comp.componentName]) global[comp.componentName] = {}
-        global[comp.componentName][object.key] = comp.state[object.key]
-    })
+    if (comp.options && comp.options.globalState){
+        // load initial global state
+        comp.options.globalState.options.include.forEach(object=>{
+            if (!global[comp.componentName]) global[comp.componentName] = {}
+            global[comp.componentName][object.key] = comp.state[object.key]
+        })
+    }
 
     comp.passelWillMount()
 
