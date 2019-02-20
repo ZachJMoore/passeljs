@@ -13,6 +13,7 @@ const components = {}
 const use = (Comp)=>{
     const comp = new Comp({global, globalChanged})
 
+    if (!comp.componentName) throw new Error(`Component names are required`)
     if (components[comp.componentName]) throw new Error(`Component name '${comp.componentName}' is already used. Duplicate names not allowed`)
 
     if (comp.options && comp.options.fsState){
