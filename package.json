@@ -1,0 +1,25 @@
+{
+  "name": "passeljs",
+  "version": "1.0.0",
+  "description": "An IoT Framework",
+  "main": "index.js",
+  "scripts": {
+    "dev": "cd example && nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZachJMoore/passeljs.git"
+  },
+  "author": "Zach Moore",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ZachJMoore/passeljs/issues"
+  },
+  "homepage": "https://github.com/ZachJMoore/passeljs#readme",
+  "dependencies": {
+    "fs-jetpack": "^2.2.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10"
+  }
+}
