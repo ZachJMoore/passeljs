@@ -52,6 +52,11 @@ class TestComponent extends PasselComponent{
         this.stateChanged.on("temperature", console.log) //local stage change callback
         this.globalChanged.on("TestComponent.temperature", console.log) //global state change callback. These are prefixed with the componentName to avoid naming conflicts.
 
+        // Get message events
+        this.globalEvent.on("message", (message)=>{
+            console.log("Component one received message: ", message)
+        })
+
         // example state updating. Could be used for IoT devices to keep track of sensors
         const interval = setInterval(()=>{
             this.setState({temperature: this.state.temperature + 2})
@@ -59,7 +64,7 @@ class TestComponent extends PasselComponent{
 
         setTimeout(()=>{
             clearInterval(interval)
-        }, 10000)
+        }, 5000)
 
     }
 }
