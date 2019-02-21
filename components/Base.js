@@ -1,8 +1,14 @@
+// Base component for all others to extend
+
 const EventEmitter = require("events")
 const helpers = require("../helpers.js")
 
 class BaseComponent{
     constructor(props){
+
+        // Make sure we know which components are which
+        this._component_type = "Base"
+
         // initialize event emitters
         this.stateChanged = new EventEmitter()
         this.localEvent = new EventEmitter()
@@ -87,7 +93,7 @@ class BaseComponent{
         })
 
         if (updateFileSystem) {
-            let pfsState = this._component_file_store.getState()
+            let pfsState = this._internal_component_file_store.getState()
 
             if (
                 this._fsState_recurrent_update_limit_interval === null
@@ -112,7 +118,7 @@ class BaseComponent{
                 }
 
                 // update file system
-                this._component_file_store.setState(fsState)
+                this._internal_component_file_store.setState(fsState)
             }
         }
 

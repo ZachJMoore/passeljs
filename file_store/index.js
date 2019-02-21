@@ -1,9 +1,9 @@
 const Base = require("./Base")
 const InternalStore = require("./InternalStore")
-const ComponentStore = require("./ComponentStore")
+const InternalComponentStore = require("./InternalComponentStore")
 
 module.exports = {
     Base,
     InternalStore,
-    ComponentStore
+    InternalComponentStore
 }

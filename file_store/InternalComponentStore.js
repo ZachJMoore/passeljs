@@ -1,6 +1,6 @@
 const InternalStore = require("./InternalStore")
 
-module.exports = class ComponentStore extends InternalStore{
+module.exports = class InternalComponentStore extends InternalStore{
     constructor(pathname){
         super()
 
@@ -8,9 +8,9 @@ module.exports = class ComponentStore extends InternalStore{
     }
 
     getState(){
-        return this.get("reserved/state")
+        return this.get("state")
     }
     setState(state){
-        this.set("reserved/state", state)
+        this.set("state", state)
     }
 }

@@ -21,9 +21,9 @@ index.js
 
 TestComponent.js
 ```javascript
-    const { PasselComponent } = require("passeljs")
+    const { Components } = require("passeljs")
 
-    class TestComponent extends PasselComponent{
+    module.exports = class TestComponent extends Components.Base{
 
     constructor(props){
         super(props)
@@ -37,11 +37,11 @@ TestComponent.js
 
     }
 
-    passelDidMount(){ // All components are ready to go.
+    componentDidMount(){ // All components are ready to go.
 
         // State can be access directly through this.state or this.global if no reactivity is needed.
-        this.stateChanged.on("temperature", console.log) //local
-        this.globalChanged.on("TestComponent.temperature", console.log) //global.
+        this.stateChanged.on("temperature", console.log) //called locally when the value of this.state.temperature changes
+        this.globalChanged.on("TestComponent.temperature", console.log) //called globally when TestComponent changes the value of this.state.temperature
 
         const interval = setInterval(()=>{
             this.setState({temperature: this.state.temperature + 2})
@@ -53,8 +53,6 @@ TestComponent.js
 
     }
 }
-
-module.exports = TestComponent
 ```
 
 #### Configuration
@@ -62,7 +60,8 @@ module.exports = TestComponent
 Options:
 ```javascript
 this.options = {
-    // defines what values from state will be saved to the filesystem
+    // defines what values from state will be saved to the filesystem and restored upon boot
+    // All files are saved in app/storage/internal/[componentName]
     fsState: {
         options: {
             include: [
@@ -71,7 +70,7 @@ this.options = {
             ]
         }
     },
-    // defines which values to expose to the global object and if they should emit globalChanged
+    // defines which values to expose to the global object and if they should emit globalChanged events
     globalState: {
         options: {
             include: [
@@ -91,11 +90,56 @@ this.options = {
 
 LifeCycle Events:
 ```javascript
-    passelWillMount(){
-        // State is initialized for this component, but not all components are ready
+    componentWillMount(){
+        // Local State is initialized for this component, but not all components are ready
+        // Not all of global state will be up to date yet.
+        // It is not advised to setState here.
     }
 
-    passelDidMount(){
-        // All components are ready. Do all of your logic here.
+    componentDidMount(){
+        // All components are ready, global and local state are initialized. Do all of your logic here.
+    }
+```
+
+#### Components
+
+```javascript
+    const { Components } = require("passeljs")
+
+    // All components extend Components.Base and can access all the same functions.
+
+    // Has access to all of the above
+    class Basic extends Components.Base{
+    }
+
+    // Adds a function to received a FileStore class. Built on top of fsjetpack.
+    // Useful for components that need to persist data but not always have it in memory/state
+    // All files are saved in app/storage/public/[componentName]
+    class Backup extends Components.WithStore{
+        constructor(props){
+        super(props)
+
+        this.componentName = "Backup"
+
+        class FileStore extends this.getFileStore(){
+            constructor(props){
+                super(props)
+            }
+
+            writeTest(fileName, data){
+                this.directory.write(`${fileName}.json`, data, {
+                    atomic: true
+                })
+            }
+        }
+
+        this.fileStore = new FileStore()
+    }
+
+    componentDidMount(){
+        this.fileStore.writeTest("testData", {
+            text: "This is a WithStore component"
+        })
+    }
     }
 ```

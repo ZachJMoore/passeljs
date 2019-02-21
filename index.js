@@ -1,6 +1,6 @@
 const EventEmitter = require("events")
-const BaseComponent = require("./components/BaseComponent.js")
-const { ComponentStore } = require("./file_store")
+const Components = require("./components")
+const { InternalComponentStore } = require("./file_store")
 
 
 // global state
@@ -11,30 +11,30 @@ const globalChanged = new EventEmitter()
 const globalEvent = new EventEmitter()
 
 // components listed by name
-const components = {}
+const useComponents = {}
 
 // initialize new components
 const use = (Comp)=>{
     const comp = new Comp({global, globalChanged, globalEvent})
 
     if (!comp.componentName) throw new Error(`Component names are required`)
-    if (components[comp.componentName]) throw new Error(`Component name '${comp.componentName}' is already used. Duplicate names not allowed`)
+    if (useComponents[comp.componentName]) throw new Error(`Component name '${comp.componentName}' is already used. Duplicate names not allowed`)
 
     if (comp.options && comp.options.fsState){
 
         // construct component store
-        const componentFileStore = new ComponentStore(comp.componentName)
-        comp._component_file_store = componentFileStore
+        const internalComponentFileStore = new InternalComponentStore(comp.componentName)
+        comp._internal_component_file_store = internalComponentFileStore
 
         // Load initial fsStore state into component or generate from default state
-        const fsState = componentFileStore.getState()
+        const fsState = internalComponentFileStore.getState()
         if (fsState) comp.state = {...comp.state, ...fsState}
         else {
             let data = {}
             comp.options.fsState.options.include.forEach(object=>{
                 data[object.key] = comp.state[object.key]
             })
-            componentFileStore.setState(data)
+            internalComponentFileStore.setState(data)
         }
     }
 
@@ -48,18 +48,18 @@ const use = (Comp)=>{
 
     comp.componentWillMount()
 
-    components[comp.componentName] = comp
+    useComponents[comp.componentName] = comp
 }
 
 // mount components
 const begin = ()=>{
-    Object.values(components).forEach((comp)=>{
+    Object.values(useComponents).forEach((comp)=>{
         comp.componentDidMount()
     })
 }
 
 module.exports = {
-    Component: BaseComponent,
+    Components,
     global,
     globalChanged,
     use,
