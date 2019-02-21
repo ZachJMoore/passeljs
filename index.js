@@ -1,6 +1,7 @@
 const EventEmitter = require("events")
 const BaseComponent = require("./components/BaseComponent.js")
-const { internalStore } = require("./file_store")
+const { ComponentStore } = require("./file_store")
+
 
 // global state
 const global = {}
@@ -20,15 +21,20 @@ const use = (Comp)=>{
     if (components[comp.componentName]) throw new Error(`Component name '${comp.componentName}' is already used. Duplicate names not allowed`)
 
     if (comp.options && comp.options.fsState){
+
+        // construct component store
+        const componentFileStore = new ComponentStore(comp.componentName)
+        comp.componentFileStore = componentFileStore
+
         // Load initial fsStore state into component or generate from default state
-        const fsState = internalStore.get(comp.componentName)
+        const fsState = componentFileStore.get("reservedState")
         if (fsState) comp.state = {...comp.state, ...fsState}
         else {
             let data = {}
             comp.options.fsState.options.include.forEach(object=>{
                 data[object.key] = comp.state[object.key]
             })
-            internalStore.set(comp.componentName, data)
+            componentFileStore.set("reservedState", data)
         }
     }
 

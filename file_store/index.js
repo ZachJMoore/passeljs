@@ -1,18 +1,9 @@
 const Base = require("./Base")
-
-class InternalStore extends Base{
-
-    constructor(props){
-        super(props)
-
-        this.directory = this.directory.cwd("internal")
-    }
-}
-
-let internalStore = new InternalStore()
+const InternalStore = require("./InternalStore")
+const ComponentStore = require("./ComponentStore")
 
 module.exports = {
     Base,
-    internalStore,
-    InternalStore
+    InternalStore,
+    ComponentStore
 }
