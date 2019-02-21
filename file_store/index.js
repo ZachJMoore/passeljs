@@ -12,6 +12,7 @@ class InternalStore extends Base{
 let internalStore = new InternalStore()
 
 module.exports = {
+    Base,
     internalStore,
     InternalStore
 }
