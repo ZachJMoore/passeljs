@@ -60,9 +60,10 @@ TestComponent.js
 Options:
 ```javascript
 this.options = {
-    // defines what values from state will be saved to the filesystem and restored upon boot
+    // Defines what values from state will be saved to the filesystem and restored upon boot
     // All files are saved in app/storage/internal/[componentName]
     fsState: {
+        recurrentUpdateLimit: null // null or number. Defines how many milliseconds between updates. This is a safe guard for devices running off of SD cards.
         options: {
             include: [
                 {key: "temperature"},
@@ -118,21 +119,21 @@ LifeCycle Events:
     class Backup extends Components.WithStore{
         constructor(props){
             super(props)
-    
+
             this.componentName = "Backup"
-    
+
             class FileStore extends this.getFileStore(){
                 constructor(props){
                     super(props)
                 }
-    
+
                 writeTest(fileName, data){
                     this.directory.write(`${fileName}.json`, data, {
                         atomic: true
                         })
                     }
                 }
-    
+
                 this.fileStore = new FileStore()
             }
         }
