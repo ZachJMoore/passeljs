@@ -1,5 +1,5 @@
 const EventEmitter = require("events")
-const PasselComponent = require("./components/PasselComponent.js")
+const BaseComponent = require("./components/BaseComponent.js")
 const { internalStore } = require("./file_store")
 
 // global state
@@ -40,7 +40,7 @@ const use = (Comp)=>{
         })
     }
 
-    comp.passelWillMount()
+    comp.componentWillMount()
 
     components[comp.componentName] = comp
 }
@@ -48,15 +48,14 @@ const use = (Comp)=>{
 // mount components
 const begin = ()=>{
     Object.values(components).forEach((comp)=>{
-        comp.passelDidMount()
+        comp.componentDidMount()
     })
 }
 
 module.exports = {
-    PasselComponent,
+    Component: BaseComponent,
     global,
     globalChanged,
-    components,
     use,
     begin
 }

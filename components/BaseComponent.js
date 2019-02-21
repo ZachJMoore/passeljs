@@ -13,11 +13,11 @@ class Component{
         this.globalChanged = props.globalChanged
     }
 
-    passelWillMount(){
+    componentWillMount(){
 
     }
 
-    passelDidMount(){
+    componentDidMount(){
 
     }
 
