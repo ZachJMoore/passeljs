@@ -24,17 +24,17 @@ const use = (Comp)=>{
 
         // construct component store
         const componentFileStore = new ComponentStore(comp.componentName)
-        comp.componentFileStore = componentFileStore
+        comp._component_file_store = componentFileStore
 
         // Load initial fsStore state into component or generate from default state
-        const fsState = componentFileStore.get("reservedState")
+        const fsState = componentFileStore.getState()
         if (fsState) comp.state = {...comp.state, ...fsState}
         else {
             let data = {}
             comp.options.fsState.options.include.forEach(object=>{
                 data[object.key] = comp.state[object.key]
             })
-            componentFileStore.set("reservedState", data)
+            componentFileStore.setState(data)
         }
     }
 

@@ -1,6 +1,7 @@
 const EventEmitter = require("events")
+const helpers = require("../helpers.js")
 
-class Component{
+class BaseComponent{
     constructor(props){
         // initialize event emitters
         this.stateChanged = new EventEmitter()
@@ -10,6 +11,9 @@ class Component{
         // add global state and emitter
         this.global = props.global
         this.globalChanged = props.globalChanged
+
+        // Set placeholder fsState max update limit variable
+        this._fsState_recurrent_update_limit_interval = null
     }
 
     componentWillMount(){
@@ -82,10 +86,38 @@ class Component{
             }
         })
 
-        if (updateFileSystem) this.componentFileStore.set("reservedState", fsState)
+        if (updateFileSystem) {
+            let pfsState = this._component_file_store.getState()
+
+            if (
+                this._fsState_recurrent_update_limit_interval === null
+                && helpers.isObject(pfsState)
+                && !helpers.compareObject(fsState, pfsState)
+               ){
+                // ensure we don't update file system more than than once in the update limit
+
+                if (this.options.fsState.recurrentUpdateLimit !== null
+                && typeof this.options.fsState.recurrentUpdateLimit === "number"){
+
+                    this._fsState_recurrent_update_limit_interval = setTimeout(()=>{
+                        this._fsState_recurrent_update_limit_interval = null
+                    }, this.options.fsState.recurrentUpdateLimit)
+
+                } else if (this.options.fsState.recurrentUpdateLimit === undefined){
+
+                    this._fsState_recurrent_update_limit_interval = setTimeout(()=>{
+                        this._fsState_recurrent_update_limit_interval = null
+                    }, 60*10000)
+
+                }
+
+                // update file system
+                this._component_file_store.setState(fsState)
+            }
+        }
 
     }
 
 }
 
-module.exports = Component
+module.exports = BaseComponent
