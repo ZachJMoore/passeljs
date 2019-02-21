@@ -3,8 +3,12 @@ const { internalStore } = require("../file_store")
 
 class Component{
     constructor(props){
-        // initialize event emitters and global state
+        // initialize event emitters
         this.stateChanged = new EventEmitter()
+        this.localEvent = new EventEmitter()
+        this.globalEvent = props.globalEvent
+
+        // add global state and emitter
         this.global = props.global
         this.globalChanged = props.globalChanged
     }

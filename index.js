@@ -6,12 +6,15 @@ const { internalStore } = require("./file_store")
 const global = {}
 const globalChanged = new EventEmitter()
 
+// globalEvents
+const globalEvent = new EventEmitter()
+
 // components listed by name
 const components = {}
 
 // initialize new components
 const use = (Comp)=>{
-    const comp = new Comp({global, globalChanged})
+    const comp = new Comp({global, globalChanged, globalEvent})
 
     if (!comp.componentName) throw new Error(`Component names are required`)
     if (components[comp.componentName]) throw new Error(`Component name '${comp.componentName}' is already used. Duplicate names not allowed`)
