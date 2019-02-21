@@ -117,29 +117,30 @@ LifeCycle Events:
     // All files are saved in app/storage/public/[componentName]
     class Backup extends Components.WithStore{
         constructor(props){
-        super(props)
-
-        this.componentName = "Backup"
-
-        class FileStore extends this.getFileStore(){
-            constructor(props){
-                super(props)
-            }
-
-            writeTest(fileName, data){
-                this.directory.write(`${fileName}.json`, data, {
-                    atomic: true
-                })
+            super(props)
+    
+            this.componentName = "Backup"
+    
+            class FileStore extends this.getFileStore(){
+                constructor(props){
+                    super(props)
+                }
+    
+                writeTest(fileName, data){
+                    this.directory.write(`${fileName}.json`, data, {
+                        atomic: true
+                        })
+                    }
+                }
+    
+                this.fileStore = new FileStore()
             }
         }
 
-        this.fileStore = new FileStore()
-    }
-
-    componentDidMount(){
-        this.fileStore.writeTest("testData", {
-            text: "This is a WithStore component"
-        })
-    }
+        componentDidMount(){
+            this.fileStore.writeTest("testData", {
+                text: "This is a WithStore component"
+            })
+        }
     }
 ```
