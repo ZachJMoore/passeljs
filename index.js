@@ -11,14 +11,14 @@ const globalChanged = new EventEmitter()
 const globalEvent = new EventEmitter()
 
 // components listed by name
-const useComponents = {}
+const initializedComponents = {}
 
 // initialize new components
 const use = (Comp)=>{
     const comp = new Comp({global, globalChanged, globalEvent})
 
     if (!comp.componentName) throw new Error(`Component names are required`)
-    if (useComponents[comp.componentName]) throw new Error(`Component name '${comp.componentName}' is already used. Duplicate names not allowed`)
+    if (initializedComponents[comp.componentName]) throw new Error(`Component name '${comp.componentName}' is already used. Duplicate names not allowed`)
 
     if (comp.options && comp.options.fsState){
 
@@ -48,12 +48,13 @@ const use = (Comp)=>{
 
     comp.componentWillMount()
 
-    useComponents[comp.componentName] = comp
+    initializedComponents[comp.componentName] = comp
+    return comp
 }
 
 // mount components
 const begin = ()=>{
-    Object.values(useComponents).forEach((comp)=>{
+    Object.values(initializedComponents).forEach((comp)=>{
         comp.componentDidMount()
     })
 }
@@ -62,6 +63,7 @@ module.exports = {
     Components,
     global,
     globalChanged,
+    initializedComponents,
     use,
     begin
 }
