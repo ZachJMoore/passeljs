@@ -1,6 +1,6 @@
 const EventEmitter = require("events")
 const PasselComponent = require("./components/PasselComponent.js")
-const { store } = require("./store")
+const { internalStore } = require("./file_store")
 
 // global state
 const global = {}
@@ -18,14 +18,14 @@ const use = (Comp)=>{
 
     if (comp.options && comp.options.fsState){
         // Load initial fsStore state into component or generate from default state
-        const fsState = store.get(comp.componentName)
+        const fsState = internalStore.get(comp.componentName)
         if (fsState) comp.state = {...comp.state, ...fsState}
         else {
             let data = {}
             comp.options.fsState.options.include.forEach(object=>{
                 data[object.key] = comp.state[object.key]
             })
-            store.set(comp.componentName, data)
+            internalStore.set(comp.componentName, data)
         }
     }
 

@@ -1,5 +1,5 @@
 const EventEmitter = require("events")
-const { store } = require("../store")
+const { internalStore } = require("../file_store")
 
 class Component{
     constructor(props){
@@ -79,7 +79,7 @@ class Component{
             }
         })
 
-        if (updateFileSystem) store.set(this.componentName, fsState)
+        if (updateFileSystem) internalStore.set(this.componentName, fsState)
 
     }
 
