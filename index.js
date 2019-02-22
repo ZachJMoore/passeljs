@@ -7,9 +7,6 @@ const { InternalComponentStore } = require("./file_store")
 const global = {}
 const globalChanged = new EventEmitter()
 
-// globalEvents
-const globalEvent = new EventEmitter()
-
 // components listed by name
 const initializedComponents = {}
 
