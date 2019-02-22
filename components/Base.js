@@ -2,6 +2,8 @@
 
 const EventEmitter = require("events")
 const helpers = require("../helpers.js")
+const { InternalComponentStore } = require("../file_store")
+const _ = require("lodash")
 
 class BaseComponent{
     constructor(props){
@@ -11,6 +13,9 @@ class BaseComponent{
         this._component_children = {}
 
         this._initialized_components = props.initializedComponents
+
+        this._component_path = []
+        this._component_depth = 0
 
         // initialize event emitters
         this.stateChanged = new EventEmitter()
@@ -42,7 +47,7 @@ class BaseComponent{
 
     }
 
-    setState(value, callback){
+    setState(value, cb){
 
         if (!value) return
 
@@ -82,12 +87,11 @@ class BaseComponent{
                 if (updateGlobal) this.options.globalState.options.include.forEach((object)=>{
                     if (object.key === key){
 
-                        //ensure there is somewhere to right
-                        if (!this.global[this.componentName]) this.global[this.componentName] = {}
-
-                        //set global and emit value
-                        this.global[this.componentName][key] = value[key]
-                        if (object.emit) this.globalChanged.emit(`${this.componentName}.${key}`, value[key])
+                        let globalPath = helpers.resolveObjectPath(this._component_path, this.global)
+                        let temp = {}
+                        if (!globalPath) globalPath = helpers.createObjectPath(this._component_path, temp)
+                        globalPath[object.key] = this.state[object.key]
+                        _.merge(this.global, temp)
 
                     }
                 })
@@ -112,20 +116,25 @@ class BaseComponent{
                 && helpers.isObject(pfsState)
                 && !helpers.compareObject(fsState, pfsState)
                ){
+
                 // ensure we don't update file system more than than once in the update limit
+                if (this.options.fsState.recurrentUpdateLimit === null){
 
-                if (this.options.fsState.recurrentUpdateLimit !== null
-                && typeof this.options.fsState.recurrentUpdateLimit === "number"){
+                } else {
 
-                    this._fsState_recurrent_update_limit_interval = setTimeout(()=>{
-                        this._fsState_recurrent_update_limit_interval = null
-                    }, this.options.fsState.recurrentUpdateLimit)
+                    if (typeof this.options.fsState.recurrentUpdateLimit === "number"){
 
-                } else if (this.options.fsState.recurrentUpdateLimit === undefined){
+                        this._fsState_recurrent_update_limit_interval = setTimeout(()=>{
+                            this._fsState_recurrent_update_limit_interval = null
+                        }, this.options.fsState.recurrentUpdateLimit)
 
-                    this._fsState_recurrent_update_limit_interval = setTimeout(()=>{
-                        this._fsState_recurrent_update_limit_interval = null
-                    }, 60*10000)
+                    } else {
+
+                        this._fsState_recurrent_update_limit_interval = setTimeout(()=>{
+                            this._fsState_recurrent_update_limit_interval = null
+                        }, 60*10000)
+
+                    }
 
                 }
 
@@ -134,10 +143,10 @@ class BaseComponent{
             }
         }
 
-        callback()
+        if (cb) cb()
     }
 
-    ensureFsState(value, callback){
+    ensureFsState(value, cb){
         if (!value) return
 
         if (!this.state) throw new Error("State must be set before calling setState")
@@ -165,7 +174,7 @@ class BaseComponent{
             this._internal_component_file_store.setState(fsState)
         }
 
-        callback()
+        if (cb) cb()
     }
 
     use(Comp, propsToInherit){
@@ -181,11 +190,13 @@ class BaseComponent{
             initializedComponents: this._initialized_components
         })
 
-        if (this.state && helpers.resolveObjectPath(comp.componentName, this.state)){
+        if (!comp.componentName) throw new Error(`Component names are required`)
+        if (this._component_children[comp.componentName]){
             throw new Error(`Component path ${this._component_path.join(".")}.${comp.componentName} is already in use. Children must use unique names`)
         }
 
-        comp._component_path = this._component_path.slice().push(comp.componentName)
+        comp._component_path = this._component_path.slice()
+        comp._component_path.push(comp.componentName)
         comp._component_depth = this._component_depth + 1
 
         if (comp.options && comp.options.fsState){
@@ -209,17 +220,28 @@ class BaseComponent{
         if (comp.options && comp.options.globalState){
             // load initial global state
             comp.options.globalState.options.include.forEach(object=>{
+
                 let globalPath = helpers.resolveObjectPath(comp._component_path, this.global)
-                if (!globalPath) globalPath = helpers.createObjectPath(comp._component_path)
+                let temp = {}
+                if (!globalPath) globalPath = helpers.createObjectPath(comp._component_path, temp)
                 globalPath[object.key] = comp.state[object.key]
+                _.merge(this.global, temp)
+
             })
         }
 
-        comp.componentWillMount()
 
-        let icPath = helpers.resolveObjectPath(this.initialized_component_path, this.initializedComponents)
-        icPath.children[comp.componentName] = comp
-        comp._initialized_component_path = this._initialized_component_path.slice().push("children", comp.componentName)
+        let icPath = helpers.resolveObjectPath(this._initialized_component_path, this._initialized_components)
+        icPath.children[comp.componentName] = {
+            component: comp,
+            children: {}
+        }
+        this._component_children[comp.componentName] = comp
+        comp._initialized_component_path = this._initialized_component_path.slice()
+        comp._initialized_component_path.push("children", comp.componentName)
+
+
+        comp.componentWillMount()
     }
 
 }

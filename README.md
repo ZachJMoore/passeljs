@@ -14,7 +14,7 @@ index.js
 
     passel.use(TestComponent)
 
-    passel.begin()
+    passel.mountComponents()
 ```
 
 <br/>
@@ -122,6 +122,9 @@ LifeCycle Events:
 
             this.componentName = "Backup"
 
+        }
+
+        componentWillMount(){
             class FileStore extends this.getFileStore(){
                 constructor(props){
                     super(props)

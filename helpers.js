@@ -18,12 +18,12 @@ module.exports.resolveObjectPath = (path, obj) => {
     if (Array.isArray(path)) path = path.join(".")
     return path.split('.').reduce(function(prev, curr) {
         return prev ? prev[curr] : null
-    }, obj || self)
+    }, obj)
 }
 
 module.exports.createObjectPath = (path, obj) => {
     if (Array.isArray(path)) path = path.join(".")
     return path.split('.').reduce(function(prev, curr) {
         return prev[curr] = {}
-    }, obj || self)
+    }, obj)
 }

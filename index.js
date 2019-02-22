@@ -47,16 +47,26 @@ const use = (Comp, propsToInherit)=>{
         })
     }
 
-    comp.componentWillMount()
+    comp._initialized_component_path = [comp.componentName]
 
-    initializedComponents[comp.componentName] = { component: comp }
+    initializedComponents[comp.componentName] = {
+        component: comp,
+        children: {}
+    }
+
+    comp.componentWillMount()
 }
 
 // mount components
-const begin = ()=>{
-    Object.values(initializedComponents).forEach((comp)=>{
-        comp.componentDidMount()
-    })
+const mountComponents = ()=>{
+    let mount = (object)=>{
+        Object.values(object).forEach((comp)=>{
+            comp.component.componentDidMount()
+            if (comp.children) mount(comp.children)
+        })
+    }
+
+    mount(initializedComponents)
 }
 
 module.exports = {
@@ -64,6 +74,6 @@ module.exports = {
     global,
     globalChanged,
     use,
-    begin
+    mountComponents
 }
 

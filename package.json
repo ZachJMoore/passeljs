@@ -1,6 +1,6 @@
 {
   "name": "passeljs",
-  "version": "2.1.7",
+  "version": "2.2.7",
   "description": "An IoT Framework",
   "main": "index.js",
   "scripts": {
@@ -17,7 +17,8 @@
   },
   "homepage": "https://github.com/ZachJMoore/passeljs#readme",
   "dependencies": {
-    "fs-jetpack": "^2.2.2"
+    "fs-jetpack": "^2.2.2",
+    "lodash": "^4.17.11"
   },
   "devDependencies": {
     "nodemon": "^1.18.10"
