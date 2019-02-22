@@ -46,7 +46,6 @@ const use = (Comp)=>{
     comp.componentWillMount()
 
     initializedComponents[comp.componentName] = comp
-    return comp
 }
 
 // mount components
