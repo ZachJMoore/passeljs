@@ -55,6 +55,8 @@ const use = (Comp, propsToInherit)=>{
     }
 
     comp.componentWillMount()
+
+    return comp
 }
 
 // mount components

@@ -242,6 +242,8 @@ class BaseComponent{
 
 
         comp.componentWillMount()
+
+        return comp
     }
 
 }
