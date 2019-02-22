@@ -28,11 +28,11 @@ class BaseComponent{
 
     }
 
-    setState(value){
+    setState(value, callback){
 
         if (!value) return
 
-        if (!this.state) this.state = {}
+        if (!this.state) return
 
         if (typeof value === "function"){
             let value = value(this.state)
@@ -120,6 +120,38 @@ class BaseComponent{
             }
         }
 
+        callback()
+    }
+
+    ensureFsState(value, callback){
+        if (!value) return
+
+        if (!this.state) return
+
+        if (!this.options || !this.options.fsState) return
+
+        if (typeof value === "function"){
+            let value = value(this.state)
+        }
+
+        const fsState = this._internal_component_file_store.getState() || {}
+        let isDifferent = false
+
+        Object.keys(value).forEach((key)=>{
+            if (value[key] !== fsState[key]){ //if the value is different
+
+                // set component state
+                isDifferent = true
+                fsState = value[key]
+
+            }
+        })
+
+        if ( isDifferent && helpers.isObject(pfsState) && !helpers.compareObject(fsState, pfsState) ){
+            this._internal_component_file_store.setState(fsState)
+        }
+
+        callback()
     }
 
 }
