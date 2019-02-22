@@ -60,7 +60,6 @@ module.exports = {
     Components,
     global,
     globalChanged,
-    initializedComponents,
     use,
     begin
 }
