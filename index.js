@@ -76,6 +76,7 @@ module.exports = {
     global,
     globalChanged,
     use,
-    mountComponents
+    mountComponents,
+    initializedComponents
 }
 
