@@ -11,7 +11,6 @@ class BaseComponent{
 
         // initialize event emitters
         this.stateChanged = new EventEmitter()
-        this.globalEvent = props.globalEvent
 
         // add global state and emitter
         this.global = props.global

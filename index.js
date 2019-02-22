@@ -12,7 +12,7 @@ const initializedComponents = {}
 
 // initialize new components
 const use = (Comp)=>{
-    const comp = new Comp({global, globalChanged, globalEvent})
+    const comp = new Comp({global, globalChanged})
 
     if (!comp.componentName) throw new Error(`Component names are required`)
     if (initializedComponents[comp.componentName]) throw new Error(`Component name '${comp.componentName}' is already used. Duplicate names not allowed`)
