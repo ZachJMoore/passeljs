@@ -34,7 +34,7 @@ class BaseComponent{
         }
 
         // inherit props
-        if (props.propsToExpose){
+        if (props.propsToInherit){
             this.props = props.propsToInherit
         }
     }

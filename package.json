@@ -1,10 +1,11 @@
 {
   "name": "passeljs",
-  "version": "2.2.7",
+  "version": "2.2.8",
   "description": "An IoT Framework",
   "main": "index.js",
   "scripts": {
-    "dev": "cd examples && nodemon index.js"
+    "dev": "cd examples && nodemon index.js",
+    "dev:inspect": "cd examples && nodemon index.js --inspect-brk"
   },
   "repository": {
     "type": "git",

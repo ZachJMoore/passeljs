@@ -148,3 +148,46 @@ LifeCycle Events:
         }
     }
 ```
+
+#### Nested Components
+
+Components can use other components that derive themselves from the same Components.Base
+```javascript
+    const { Components } = require("passeljs")
+
+    class CompOne extends Components.Base{
+        constructor(props){
+            super(props)
+
+            this.componentName = "CompOne"
+
+            this.doSomethingUpHere = this.doSomethingUpHere.bind(this)
+        }
+
+        componentDidMount(){
+            this.props.doSomethingUpHere() // CompTwo
+        }
+    }
+
+    class CompTwo extends Components.Base{
+        constructor(props){
+            super(props)
+
+            this.componentName = "CompTwo"
+
+            this.doSomethingUpHere = this.doSomethingUpHere.bind(this)
+        }
+
+        doSomethingUpHere(){
+            console.log(this.componentName) // CompTwo
+        }
+
+        componentWillMount(){
+            // initialize components in here otherwise they won't ever be mounted
+            // Components can be passed props to use and can be accessed with this.props
+            this.use(CompOne, {
+                doSomethingUpHere
+            })
+        }
+    }
+```
