@@ -1,4 +1,4 @@
-function compareObject(a, b){
+module.exports.compareObject = (a, b) => {
     return (
         (Object.keys(a).length === Object.keys(b).length)
     )
@@ -10,11 +10,20 @@ function compareObject(a, b){
     )
 }
 
-function isObject(obj){
+module.exports.isObject = (obj) => {
     return obj === Object(obj);
 }
 
-module.exports = {
-    compareObject,
-    isObject
+module.exports.resolveObjectPath = (path, obj) => {
+    if (Array.isArray(path)) path = path.join(".")
+    return path.split('.').reduce(function(prev, curr) {
+        return prev ? prev[curr] : null
+    }, obj || self)
+}
+
+module.exports.createObjectPath = (path, obj) => {
+    if (Array.isArray(path)) path = path.join(".")
+    return path.split('.').reduce(function(prev, curr) {
+        return prev[curr] = {}
+    }, obj || self)
 }

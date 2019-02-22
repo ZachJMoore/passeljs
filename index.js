@@ -10,12 +10,16 @@ const globalChanged = new EventEmitter()
 // components listed by name
 const initializedComponents = {}
 
-// initialize new components
-const use = (Comp)=>{
-    const comp = new Comp({global, globalChanged})
+// initialize new top level components
+const use = (Comp, propsToInherit)=>{
+    const comp = new Comp({global, globalChanged, propsToInherit, initializedComponents})
 
     if (!comp.componentName) throw new Error(`Component names are required`)
     if (initializedComponents[comp.componentName]) throw new Error(`Component name '${comp.componentName}' is already used. Duplicate names not allowed`)
+
+    // define the global and file system state path. All top level components use just their component name
+    comp._component_path = [comp.componentName]
+    comp._component_depth = 0
 
     if (comp.options && comp.options.fsState){
 
@@ -45,7 +49,7 @@ const use = (Comp)=>{
 
     comp.componentWillMount()
 
-    initializedComponents[comp.componentName] = comp
+    initializedComponents[comp.componentName] = { component: comp }
 }
 
 // mount components

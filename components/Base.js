@@ -8,6 +8,9 @@ class BaseComponent{
 
         // Make sure we know which components are which
         this._component_type = "Base"
+        this._component_children = {}
+
+        this._initialized_components = props.initializedComponents
 
         // initialize event emitters
         this.stateChanged = new EventEmitter()
@@ -18,6 +21,17 @@ class BaseComponent{
 
         // Set placeholder fsState max update limit variable
         this._fsState_recurrent_update_limit_interval = null
+
+        // if we are a child, make sure we have access to parent state changes
+        if (props.parent){
+            this.parentState = props.parent.state
+            this.parentStateChanged = props.parent.stateChanged
+        }
+
+        // inherit props
+        if (props.propsToExpose){
+            this.props = props.propsToInherit
+        }
     }
 
     componentWillMount(){
@@ -32,7 +46,7 @@ class BaseComponent{
 
         if (!value) return
 
-        if (!this.state) return
+        if (!this.state) throw new Error("State must be set before calling setState")
 
         if (typeof value === "function"){
             let value = value(this.state)
@@ -126,7 +140,7 @@ class BaseComponent{
     ensureFsState(value, callback){
         if (!value) return
 
-        if (!this.state) return
+        if (!this.state) throw new Error("State must be set before calling setState")
 
         if (!this.options || !this.options.fsState) return
 
@@ -152,6 +166,60 @@ class BaseComponent{
         }
 
         callback()
+    }
+
+    use(Comp, propsToInherit){
+
+        let comp = new Comp({
+            parent: {
+                state: this.state,
+                stateChanged: this.stateChanged
+            },
+            global: this.global,
+            globalChanged: this.globalChanged,
+            propsToInherit,
+            initializedComponents: this._initialized_components
+        })
+
+        if (this.state && helpers.resolveObjectPath(comp.componentName, this.state)){
+            throw new Error(`Component path ${this._component_path.join(".")}.${comp.componentName} is already in use. Children must use unique names`)
+        }
+
+        comp._component_path = this._component_path.slice().push(comp.componentName)
+        comp._component_depth = this._component_depth + 1
+
+        if (comp.options && comp.options.fsState){
+
+            // construct component store
+            const internalComponentFileStore = new InternalComponentStore(comp._component_path.join("/"))
+            comp._internal_component_file_store = internalComponentFileStore
+
+            // Load initial fsStore state into component or generate from default state
+            const fsState = internalComponentFileStore.getState()
+            if (fsState) comp.state = {...comp.state, ...fsState}
+            else {
+                let data = {}
+                comp.options.fsState.options.include.forEach(object=>{
+                    data[object.key] = comp.state[object.key]
+                })
+                internalComponentFileStore.setState(data)
+            }
+        }
+
+        if (comp.options && comp.options.globalState){
+            // load initial global state
+            comp.options.globalState.options.include.forEach(object=>{
+                let globalPath = helpers.resolveObjectPath(comp._component_path, this.global)
+                if (!globalPath) globalPath = helpers.createObjectPath(comp._component_path)
+                globalPath[object.key] = comp.state[object.key]
+            })
+        }
+
+        comp.componentWillMount()
+
+        let icPath = helpers.resolveObjectPath(this.initialized_component_path, this.initializedComponents)
+        icPath.children[comp.componentName] = comp
+        comp._initialized_component_path = this._initialized_component_path.slice().push("children", comp.componentName)
     }
 
 }
