@@ -53,7 +53,7 @@ const use = (Comp, propsToInherit)=>{
     }
 
     if (comp.options && comp.options.exposeFunctions){
-        // load initial global state
+        // expose component functions
         comp.options.exposeFunctions.options.include.forEach(object=>{
 
             let pathRef = helpers.resolveObjectPath(comp._component_path, exposedComponentFunctions)
