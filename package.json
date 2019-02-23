@@ -1,7 +1,7 @@
 {
   "name": "passeljs",
-  "version": "2.3.12",
-  "description": "An IoT Framework",
+  "version": "2.3.13",
+  "description": "An IoT framework made on top of NodeJs with built in local, global, and file system component state.",
   "main": "index.js",
   "scripts": {
     "dev": "cd examples && nodemon index.js",

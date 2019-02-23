@@ -1,7 +1,7 @@
 # Passel JS
 : a large number or amount
 
-Passel is an IoT framework built on top of NodeJs. Inspired by React, although the implementation is different, Passel has built in global, local, and filesystem state management.
+Passel is an IoT framework made on top of NodeJs with built in local, global, and file system component state.
 
 #### Example Usage:
 
@@ -86,12 +86,12 @@ this.options = {
             ]
         }
     },
-    // specifies which functions to expose globally on this.exposedComponentFunctions
+    // specifies which functions to expose and be accessed through 'const { exposedComponentFunctions } = require("passeljs")'
     exposeFunctions:{
                 options: {
                     include: [
                         {
-                            key: "doSomethingElse" //key of function on class. will be automatically bound
+                            key: "doSomething" //key of function. will be automatically bound.
                         }
                     ]
                 }
@@ -102,9 +102,9 @@ this.options = {
 LifeCycle Events:
 ```javascript
     componentWillMount(){
-        // Local State is initialized for this component, but not all components are ready
+        // Local and file system state has been initialized for this component, but not all components are ready.
         // Not all of global state will be up to date yet.
-        // It is not advised to setState here.
+        // It is not advised to setState for properties here if they are exposed global and emit events on change.
     }
 
     componentDidMount(){
