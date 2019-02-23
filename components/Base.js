@@ -168,12 +168,12 @@ class BaseComponent{
 
                 // set component state
                 isDifferent = true
-                fsState = value[key]
+                fsState[key] = value[key]
 
             }
         })
 
-        if ( isDifferent && helpers.isObject(pfsState) && !helpers.compareObject(fsState, pfsState) ){
+        if (isDifferent){
             this._internal_component_file_store.setState(fsState)
         }
 
