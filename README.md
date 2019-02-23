@@ -85,7 +85,17 @@ this.options = {
                 }
             ]
         }
-    }
+    },
+    // specifies which functions to expose globally on this.exposedComponentFunctions
+    exposeFunctions:{
+                options: {
+                    include: [
+                        {
+                            key: "doSomethingElse" //key of function on class. will be automatically bound
+                        }
+                    ]
+                }
+            }
 }
 ```
 

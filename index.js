@@ -1,18 +1,23 @@
 const EventEmitter = require("events")
 const Components = require("./components")
 const { InternalComponentStore } = require("./file_store")
+const helpers = require("./helpers.js")
+const _ = require("lodash")
 
 
 // global state
 const global = {}
 const globalChanged = new EventEmitter()
 
+// exposed component functions
+const exposedComponentFunctions = {}
+
 // components listed by name
 const initializedComponents = {}
 
 // initialize new top level components
 const use = (Comp, propsToInherit)=>{
-    const comp = new Comp({global, globalChanged, propsToInherit, initializedComponents})
+    const comp = new Comp({global, globalChanged, propsToInherit, initializedComponents, exposedComponentFunctions})
 
     if (!comp.componentName) throw new Error(`Component names are required`)
     if (initializedComponents[comp.componentName]) throw new Error(`Component name '${comp.componentName}' is already used. Duplicate names not allowed`)
@@ -47,6 +52,19 @@ const use = (Comp, propsToInherit)=>{
         })
     }
 
+    if (comp.options && comp.options.exposeFunctions){
+        // load initial global state
+        comp.options.exposeFunctions.options.include.forEach(object=>{
+
+            let pathRef = helpers.resolveObjectPath(comp._component_path, exposedComponentFunctions)
+            let temp = {}
+            if (!pathRef) pathRef = helpers.createObjectPath(comp._component_path, temp)
+            pathRef[object.key] = comp[object.key].bind(comp)
+            _.merge(exposedComponentFunctions, temp)
+
+        })
+    }
+
     comp._initialized_component_path = [comp.componentName]
 
     initializedComponents[comp.componentName] = {
@@ -55,8 +73,6 @@ const use = (Comp, propsToInherit)=>{
     }
 
     comp.componentWillMount()
-
-    return comp
 }
 
 // mount components
@@ -77,6 +93,6 @@ module.exports = {
     globalChanged,
     use,
     mountComponents,
-    initializedComponents
+    exposedComponentFunctions
 }
 
