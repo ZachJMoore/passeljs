@@ -18,7 +18,7 @@ class BaseComponent{
         this._component_depth = 0
 
         // keep a reference of exposed functions
-        this.exposedComponentFunctions = props.exposedComponentFunctions
+        this._exposed_component_functions = props.exposedComponentFunctions
 
         // initialize event emitters
         this.stateChanged = new EventEmitter()
@@ -237,12 +237,12 @@ class BaseComponent{
             // load initial global state
             comp.options.exposeFunctions.options.include.forEach(object=>{
 
-                let pathRef = helpers.resolveObjectPath(comp._component_path, this.exposedComponentFunctions)
+                let pathRef = helpers.resolveObjectPath(comp._component_path, this._exposed_component_functions)
                 let temp = {}
                 if (!pathRef) pathRef = helpers.createObjectPath(comp._component_path, temp)
-                else throw new Error(`exposedComponentFunctions path ${comp._component_path.join(".")} is already occupied by a function. There is a naming conflict between children and parent wishing to expose functions`)
+                else throw new Error(`exposedComponentFunctions path ${comp._component_path.join(".")} is already occupied by a function. There is a naming conflict between children and parent both wishing to expose functions`)
                 pathRef[object.key] = comp[object.key].bind(comp)
-                _.merge(this.exposedComponentFunctions, temp)
+                _.merge(this._exposed_component_functions, temp)
 
             })
         }

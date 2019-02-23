@@ -1,6 +1,6 @@
 {
   "name": "passeljs",
-  "version": "2.3.10",
+  "version": "2.3.11",
   "description": "An IoT Framework",
   "main": "index.js",
   "scripts": {
