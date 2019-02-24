@@ -56,12 +56,12 @@ const use = (Comp, propsToInherit)=>{
         // expose component functions
         comp.options.exposeFunctions.options.include.forEach(object=>{
 
-            let pathRef = helpers.resolveObjectPath(comp._component_path, this._exposed_component_functions)
+            let pathRef = helpers.resolveObjectPath(comp._component_path, exposedComponentFunctions)
             let temp = {}
             if (pathRef && pathRef[object.key]) throw new Error(`exposedComponentFunctions path ${comp._component_path.join(".") + "." + object.key} is already occupied. There is a naming conflict.`)
             else if (!pathRef) pathRef = helpers.createObjectPath(comp._component_path, temp)
             pathRef[object.key] = comp[object.key].bind(comp)
-            _.merge(this._exposed_component_functions, temp)
+            _.merge(exposedComponentFunctions, temp)
 
         })
     }
