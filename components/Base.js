@@ -17,6 +17,8 @@ class BaseComponent{
         this._component_path = []
         this._component_depth = 0
 
+        this._component_has_mounted = false
+
         // keep a reference of exposed functions
         this._exposed_component_functions = props.exposedComponentFunctions
 
@@ -25,6 +27,8 @@ class BaseComponent{
 
         // add global state and emitter
         this.global = props.global
+        this._global_reserved_top_level_keys = props.globalReservedTopLevelKeys
+        this._global_set_state_reserved_keys = props.globalSetStateReservedKeys
         this.globalChanged = props.globalChanged
 
         // Set placeholder fsState max update limit variable
@@ -48,6 +52,33 @@ class BaseComponent{
 
     componentDidMount(){
 
+    }
+
+    setGlobal(value, cb){
+
+        if (!this._component_has_mounted) throw new Error("Setting global state before mounting is not allowed")
+
+        if (!value) return
+
+        if (!this.state) throw new Error("State must be set before calling setState")
+
+        if (typeof value === "function"){
+            let value = value(this.state)
+        }
+
+        Object.keys(value).forEach((key)=>{
+            if (value[key] !== this.state[key]){ //if the value is different
+
+                if (this._global_reserved_top_level_keys[key]) throw new Error(`this.global.${key} is reserved for components`)
+                if (this._global_set_state_reserved_keys[key] === undefined) throw new Error(`this.global.${key} default has not been defined. You must reserve keys with passel.setGlobalDefaults({...})`)
+                // set global state
+                this.global[key] = value[key]
+                this.globalChanged.emit(key, value[key])
+
+            }
+        })
+
+        if (cb) cb()
     }
 
     setState(value, cb){

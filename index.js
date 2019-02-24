@@ -7,6 +7,8 @@ const _ = require("lodash")
 
 // global state
 const global = {}
+const globalReservedTopLevelKeys = {}
+const globalSetStateReservedKeys = {}
 const globalChanged = new EventEmitter()
 
 // exposed component functions
@@ -15,9 +17,28 @@ const exposedComponentFunctions = {}
 // components listed by name
 const initializedComponents = {}
 
+// Make sure we know where we are at and can enforce calling functions in the correct order
+let hasInitialized = false
+let hasMounted = false
+
+// set global defaults
+const setGlobalDefaults = (object)=>{
+    if (hasInitialized) throw new Error("You must set global defaults before calling passel.use(...)")
+    if (hasMounted) throw new Error("You must set global defaults before mounting components")
+    if (Array.isArray(object)) throw new Error("Global defaults requires an object. You passed an array")
+    if (typeof object !== "object") throw new Error(`Global defaults requires an object. You passed an value with typeof: ${typeof object}`)
+
+    Object.keys(object).forEach(key=>{
+        globalSetStateReservedKeys[key] = object[key]
+        global[key] = object[key]
+    })
+}
+
 // initialize new top level components
 const use = (Comp, propsToInherit)=>{
-    const comp = new Comp({global, globalChanged, propsToInherit, initializedComponents, exposedComponentFunctions})
+    if (hasMounted) throw new Error("You must initialized components before calling passel.mountComponents()")
+
+    const comp = new Comp({global, globalChanged, propsToInherit, initializedComponents, exposedComponentFunctions, globalReservedTopLevelKeys, globalSetStateReservedKeys})
 
     if (!comp.componentName) throw new Error(`Component names are required`)
     if (initializedComponents[comp.componentName]) throw new Error(`Component name '${comp.componentName}' is already used. Duplicate names not allowed`)
@@ -45,6 +66,7 @@ const use = (Comp, propsToInherit)=>{
     }
 
     if (comp.options && comp.options.globalState){
+        if (globalSetStateReservedKeys[comp.componentName] !== undefined) throw new Error(`this.global.${comp.componentName} is already reserved for default global state. Component '${comp.componentName}' needs to change its componentName or this.setGlobal must be used manually rather than having passel do it automatically`)
         // load initial global state
         comp.options.globalState.options.include.forEach(object=>{
             if (!global[comp.componentName]) global[comp.componentName] = {}
@@ -74,24 +96,29 @@ const use = (Comp, propsToInherit)=>{
     }
 
     comp.componentWillMount()
+    hasInitialized = true
 }
 
 // mount components
 const mountComponents = ()=>{
+    if (!hasInitialized) throw new Error("There are no components to mount. Maybe you forgot to call passel.use(...)")
     let mount = (object)=>{
         Object.values(object).forEach((comp)=>{
+            comp.component._component_has_mounted = true
             comp.component.componentDidMount()
             if (comp.children) mount(comp.children)
         })
     }
 
     mount(initializedComponents)
+    hasMounted = true
 }
 
 module.exports = {
     Components,
     global,
     globalChanged,
+    setGlobalDefaults,
     use,
     mountComponents,
     exposedComponentFunctions
