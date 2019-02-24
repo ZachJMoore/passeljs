@@ -62,7 +62,7 @@ class BaseComponent{
         if (!value) return
 
         if (typeof value === "function"){
-            let value = value(this.state)
+            value = value(this.state)
         }
 
         Object.keys(value).forEach((key)=>{
@@ -89,7 +89,7 @@ class BaseComponent{
         if (!this.state) throw new Error("State must be set before calling setState")
 
         if (typeof value === "function"){
-            let value = value(this.state)
+            value = value(this.state)
         }
 
         let updateGlobal
@@ -126,6 +126,7 @@ class BaseComponent{
                         let temp = {}
                         if (!globalPath) globalPath = helpers.createObjectPath(this._component_path, temp)
                         globalPath[object.key] = this.state[object.key]
+                        if (object.emit) this.globalChanged.emit((this._component_path.join(".") + "." + object.key), this.state[object.key])
                         _.merge(this.global, temp)
 
                     }
