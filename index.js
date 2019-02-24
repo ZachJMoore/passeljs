@@ -40,7 +40,7 @@ const use = (Comp, propsToInherit)=>{
 
     const comp = new Comp({global, globalChanged, propsToInherit, initializedComponents, exposedComponentFunctions, globalReservedTopLevelKeys, globalSetStateReservedKeys})
 
-    if (!comp.componentName) throw new Error(`Component names are required`)
+    if (!comp.componentName) comp.componentName = comp.__proto__.constructor.name
     if (initializedComponents[comp.componentName]) throw new Error(`Component name '${comp.componentName}' is already used. Duplicate names not allowed`)
 
     // define the global and file system state path. All top level components use just their component name
