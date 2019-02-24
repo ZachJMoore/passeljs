@@ -29,7 +29,7 @@ const setGlobalDefaults = (object)=>{
     if (typeof object !== "object") throw new Error(`Global defaults requires an object. You passed an value with typeof: ${typeof object}`)
 
     Object.keys(object).forEach(key=>{
-        globalSetStateReservedKeys[key] = object[key]
+        globalSetStateReservedKeys[key] = true
         global[key] = object[key]
     })
 }
@@ -68,6 +68,7 @@ const use = (Comp, propsToInherit)=>{
 
     if (comp.options && comp.options.globalState){
         if (globalSetStateReservedKeys[comp.componentName] !== undefined) throw new Error(`this.global.${comp.componentName} is already reserved for default global state. Component '${comp.componentName}' needs to change its componentName or this.setGlobal must be used manually rather than having passel do it automatically`)
+        globalReservedTopLevelKeys[comp.componentName] = true
         // load initial global state
         comp.options.globalState.options.include.forEach(object=>{
             if (!global[comp.componentName]) global[comp.componentName] = {}

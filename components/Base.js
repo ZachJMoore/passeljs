@@ -61,8 +61,6 @@ class BaseComponent{
 
         if (!value) return
 
-        if (!this.state) throw new Error("State must be set before calling setState")
-
         if (typeof value === "function"){
             let value = value(this.state)
         }
@@ -223,6 +221,8 @@ class BaseComponent{
             },
             global: this.global,
             globalChanged: this.globalChanged,
+            globalReservedTopLevelKeys: this._global_reserved_top_level_keys,
+            globalSetStateReservedKeys: this._global_set_state_reserved_keys,
             propsToInherit,
             initializedComponents: this._initialized_components
         })
