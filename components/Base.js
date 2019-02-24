@@ -239,8 +239,8 @@ class BaseComponent{
 
                 let pathRef = helpers.resolveObjectPath(comp._component_path, this._exposed_component_functions)
                 let temp = {}
-                if (!pathRef) pathRef = helpers.createObjectPath(comp._component_path, temp)
-                else throw new Error(`exposedComponentFunctions path ${comp._component_path.join(".")} is already occupied by a function. There is a naming conflict between children and parent both wishing to expose functions`)
+                if (pathRef && pathRef[object.key]) throw new Error(`exposedComponentFunctions path ${comp._component_path.join(".") + "." + object.key} is already occupied. There is a naming conflict.`)
+                else if (!pathRef) pathRef = helpers.createObjectPath(comp._component_path, temp)
                 pathRef[object.key] = comp[object.key].bind(comp)
                 _.merge(this._exposed_component_functions, temp)
 
