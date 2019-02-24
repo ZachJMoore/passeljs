@@ -17,6 +17,7 @@ class BaseComponent{
         this._component_path = []
         this._component_depth = 0
 
+        this._component_has_initialized = false
         this._component_has_mounted = false
 
         // keep a reference of exposed functions
@@ -56,7 +57,7 @@ class BaseComponent{
 
     setGlobal(value, cb){
 
-        if (!this._component_has_mounted) throw new Error("Setting global state before mounting is not allowed")
+        if (!this._component_has_initialized) throw new Error("Setting global state before initialization is not allowed")
 
         if (!value) return
 
@@ -82,6 +83,8 @@ class BaseComponent{
     }
 
     setState(value, cb){
+
+        if (!this._component_has_initialized) throw new Error("Setting local state before initialization is not allowed")
 
         if (!value) return
 
@@ -232,6 +235,7 @@ class BaseComponent{
         comp._component_path = this._component_path.slice()
         comp._component_path.push(comp.componentName)
         comp._component_depth = this._component_depth + 1
+        comp._component_has_initialized = true
 
         if (comp.options && comp.options.fsState){
 

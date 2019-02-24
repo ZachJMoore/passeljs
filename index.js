@@ -46,6 +46,7 @@ const use = (Comp, propsToInherit)=>{
     // define the global and file system state path. All top level components use just their component name
     comp._component_path = [comp.componentName]
     comp._component_depth = 0
+    comp._component_has_initialized = true
 
     if (comp.options && comp.options.fsState){
 
