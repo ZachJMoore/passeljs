@@ -72,6 +72,7 @@ class BaseComponent{
                 if (this._global_set_state_reserved_keys[key] === undefined) throw new Error(`this.global.${key} default has not been defined. You must reserve keys with passel.setGlobalDefaults({...})`)
                 // set global state
                 this.global[key] = value[key]
+                // TODO: batch emitters until end to ensure all values are set before events are fired
                 this.globalChanged.emit(key, value[key])
 
             }
@@ -89,7 +90,7 @@ class BaseComponent{
         if (!this.state) throw new Error("State must be set before calling setState")
 
         if (typeof value === "function"){
-            value = value(this.state)
+            value = value(_.cloneDeep(this.state))
         }
 
         let updateGlobal
@@ -114,6 +115,7 @@ class BaseComponent{
 
                 // set component state
                 this.state[key] = value[key]
+                // TODO: batch emitters until end to ensure all values are set before events are fired
                 this.stateChanged.emit(key, value[key])
 
                 if (!this.options) return
@@ -126,6 +128,7 @@ class BaseComponent{
                         let temp = {}
                         if (!globalPath) globalPath = helpers.createObjectPath(this._component_path, temp)
                         globalPath[object.key] = this.state[object.key]
+                        // TODO: batch emitters until end to ensure all values are set before events are fired
                         if (object.emit) this.globalChanged.emit((this._component_path.join(".") + "." + object.key), this.state[object.key])
                         _.merge(this.global, temp)
 
