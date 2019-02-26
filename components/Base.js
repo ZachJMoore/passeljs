@@ -62,7 +62,8 @@ class BaseComponent{
         if (!value) return
 
         if (typeof value === "function"){
-            value = value(this.state)
+            value = value(_.cloneDeep(this.state))
+            if (!value) return
         }
 
         Object.keys(value).forEach((key)=>{
@@ -194,7 +195,8 @@ class BaseComponent{
         if (!this.options || !this.options.fsState) return
 
         if (typeof value === "function"){
-            let value = value(this.state)
+            value = value(_.cloneDeep(this.state))
+            if (!value) return
         }
 
         const fsState = this._internal_component_file_store.getState() || {}
