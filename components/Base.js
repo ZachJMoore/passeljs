@@ -91,6 +91,7 @@ class BaseComponent{
 
         if (typeof value === "function"){
             value = value(_.cloneDeep(this.state))
+            if (!value) return
         }
 
         let updateGlobal
