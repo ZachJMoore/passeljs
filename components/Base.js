@@ -66,8 +66,10 @@ class BaseComponent{
             if (!value) return
         }
 
+        if (_.isEqual(value, this.state)) return
+
         Object.keys(value).forEach((key)=>{
-            if (value[key] !== this.state[key]){ //if the value is different
+            if (!_.isEqual(value[key], this.state[key])){//if the value is different
 
                 if (this._global_reserved_top_level_keys[key]) throw new Error(`this.global.${key} is reserved for components`)
                 if (this._global_set_state_reserved_keys[key] === undefined) throw new Error(`this.global.${key} default has not been defined. You must reserve keys with passel.setGlobalDefaults({...})`)
@@ -95,6 +97,8 @@ class BaseComponent{
             if (!value) return
         }
 
+        if (_.isEqual(value, this.state)) return
+
         let updateGlobal
         let updateFileSystem
 
@@ -113,7 +117,7 @@ class BaseComponent{
         }
 
         Object.keys(value).forEach((key)=>{
-            if (value[key] !== this.state[key]){ //if the value is different
+            if (!_.isEqual(value[key], this.state[key])){ //if the value is different
 
                 // set component state
                 this.state[key] = value[key]
@@ -155,7 +159,7 @@ class BaseComponent{
             if (
                 this._fsState_recurrent_update_limit_interval === null
                 && helpers.isObject(pfsState)
-                && !helpers.compareObject(fsState, pfsState)
+                && !_.isEqual(fsState, pfsState)
                ){
 
                 // ensure we don't update file system more than than once in the update limit
@@ -200,21 +204,19 @@ class BaseComponent{
         }
 
         const fsState = this._internal_component_file_store.getState() || {}
-        let isDifferent = false
+
+        if (_.isEqual(value, fsState)) return
 
         Object.keys(value).forEach((key)=>{
-            if (value[key] !== fsState[key]){ //if the value is different
+            if (!_.isEqual(value[key], this.state[key])){ //if the value is different
 
                 // set component state
-                isDifferent = true
                 fsState[key] = value[key]
 
             }
         })
 
-        if (isDifferent){
-            this._internal_component_file_store.setState(fsState)
-        }
+        this._internal_component_file_store.setState(fsState)
 
         if (cb) cb()
     }
