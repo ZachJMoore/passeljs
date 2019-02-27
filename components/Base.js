@@ -208,7 +208,7 @@ class BaseComponent{
         if (_.isEqual(value, fsState)) return
 
         Object.keys(value).forEach((key)=>{
-            if (!_.isEqual(value[key], this.state[key])){ //if the value is different
+            if (!_.isEqual(value[key], fsState[key])){ //if the value is different
 
                 // set component state
                 fsState[key] = value[key]
