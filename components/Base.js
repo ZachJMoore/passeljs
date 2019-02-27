@@ -191,34 +191,12 @@ class BaseComponent{
         if (cb) cb()
     }
 
-    ensureFsState(value, cb){
-        if (!value) return
-
-        if (!this.state) throw new Error("State must be set before calling setState")
-
-        if (!this.options || !this.options.fsState) return
-
-        if (typeof value === "function"){
-            value = value(_.cloneDeep(this.state))
-            if (!value) return
-        }
-
+    ensureFsState(){
         const fsState = this._internal_component_file_store.getState() || {}
 
-        if (_.isEqual(value, fsState)) return
+        if (_.isEqual(fsState, this.state)) return
 
-        Object.keys(value).forEach((key)=>{
-            if (!_.isEqual(value[key], fsState[key])){ //if the value is different
-
-                // set component state
-                fsState[key] = value[key]
-
-            }
-        })
-
-        this._internal_component_file_store.setState(fsState)
-
-        if (cb) cb()
+        this._internal_component_file_store.setState(this.state)
     }
 
     use(Comp, propsToInherit){
