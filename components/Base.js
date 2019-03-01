@@ -214,7 +214,7 @@ class BaseComponent{
             initializedComponents: this._initialized_components
         })
 
-        if (!comp.componentName) throw new Error(`Component names are required`)
+        if (!comp.componentName) comp.componentName = comp.__proto__.constructor.name
         if (this._component_children[comp.componentName]){
             throw new Error(`Component path ${this._component_path.join(".")}.${comp.componentName} is already in use. Children must use unique names`)
         }
