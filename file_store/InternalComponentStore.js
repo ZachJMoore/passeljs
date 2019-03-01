@@ -10,7 +10,7 @@ module.exports = class InternalComponentStore extends InternalStore{
     getState(){
         return this.get("state")
     }
-    setState(state){
-        this.set("state", state)
+    setState(state, atomic){
+        this.set("state", state, atomic)
     }
 }

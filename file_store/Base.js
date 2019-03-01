@@ -11,9 +11,9 @@ class Base {
 
     }
 
-    set(fileName, data){
+    set(fileName, data, atomic = false){
         this.directory.write(`${fileName}.json`, data, {
-            atomic: true
+            atomic
         })
     }
 

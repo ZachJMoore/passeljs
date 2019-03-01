@@ -84,7 +84,11 @@ class BaseComponent{
         if (cb) cb()
     }
 
-    setState(value, cb){
+    setState(value, options){
+
+        if (!options) options = {
+            atomic: false
+        }
 
         if (!this._component_has_initialized) throw new Error("Setting local state before initialization is not allowed")
 
@@ -184,19 +188,22 @@ class BaseComponent{
                 }
 
                 // update file system
-                this._internal_component_file_store.setState(fsState)
+                this._internal_component_file_store.setState(fsState, options.atomic)
             }
         }
 
-        if (cb) cb()
+        if (options.cb && typeof options.cb === "function") options.cb()
     }
 
-    ensureFsState(){
+    ensureFsState(options){
+        if (!options) options = {
+            atomic: false
+        }
         const fsState = this._internal_component_file_store.getState() || {}
 
         if (_.isEqual(fsState, this.state)) return
 
-        this._internal_component_file_store.setState(this.state)
+        this._internal_component_file_store.setState(this.state, options.atomic)
     }
 
     use(Comp, propsToInherit){
@@ -238,7 +245,7 @@ class BaseComponent{
                 comp.options.fsState.options.include.forEach(object=>{
                     data[object.key] = comp.state[object.key]
                 })
-                internalComponentFileStore.setState(data)
+                internalComponentFileStore.setState(data, true)
             }
         }
 
