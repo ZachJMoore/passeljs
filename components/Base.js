@@ -245,7 +245,7 @@ class BaseComponent{
                 comp.options.fsState.options.include.forEach(object=>{
                     data[object.key] = comp.state[object.key]
                 })
-                internalComponentFileStore.setState(data, true)
+                internalComponentFileStore.setState(data)
             }
         }
 
