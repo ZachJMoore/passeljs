@@ -55,18 +55,19 @@ class BaseComponent{
 
     }
 
-    setGlobal(value, cb){
+    setGlobal(value, options){
+
+        if (!options) options = {}
 
         if (!this._component_has_initialized) throw new Error("Setting global state before initialization is not allowed")
 
         if (!value) return
 
         if (typeof value === "function"){
-            value = value(_.cloneDeep(this.state))
+            value = value(_.cloneDeep(this.global))
             if (!value) return
+            if (_.isEqual(value, this.global)) return
         }
-
-        if (_.isEqual(value, this.state)) return
 
         Object.keys(value).forEach((key)=>{
             if (!_.isEqual(value[key], this.state[key])){//if the value is different
@@ -81,7 +82,7 @@ class BaseComponent{
             }
         })
 
-        if (cb) cb()
+        if (options.cb && typeof options.cb === "function") options.cb()
     }
 
     setState(value, options){
@@ -99,9 +100,8 @@ class BaseComponent{
         if (typeof value === "function"){
             value = value(_.cloneDeep(this.state))
             if (!value) return
+            if (_.isEqual(value, this.state)) return
         }
-
-        if (_.isEqual(value, this.state)) return
 
         let updateGlobal
         let updateFileSystem

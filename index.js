@@ -34,6 +34,38 @@ const setGlobalDefaults = (object)=>{
     })
 }
 
+// Allow setting global from outside of Passel.js
+const setGlobal = (value, options) => {
+
+    if (!options) options = {}
+
+    if (!hasMounted) throw new Error("Setting global state outside of passel before mounting components is not allowed. Use passel.setGlobalDefaults({..})")
+
+    if (!value) return
+
+    if (typeof value === "function"){
+        value = value(_.cloneDeep(global))
+        if (!value) return
+    }
+
+    if (_.isEqual(value, global)) return
+
+    Object.keys(value).forEach((key)=>{
+        if (!_.isEqual(value[key], global[key])){//if the value is different
+
+            if (globalReservedTopLevelKeys[key]) throw new Error(`global.${key} is reserved for components`)
+            if (globalSetStateReservedKeys[key] === undefined) throw new Error(`global.${key} default has not been defined. You must reserve keys with passel.setGlobalDefaults({...})`)
+            // set global state
+            global[key] = value[key]
+            // TODO: batch emitters until end to ensure all values are set before events are fired
+            globalChanged.emit(key, value[key])
+
+        }
+    })
+
+    if (options.cb && typeof options.cb === "function") options.cb()
+}
+
 // initialize new top level components
 const use = (Comp, propsToInherit)=>{
     if (hasMounted) throw new Error("You must initialized components before calling passel.mountComponents()")
@@ -120,6 +152,7 @@ module.exports = {
     Components,
     global,
     globalChanged,
+    setGlobal,
     setGlobalDefaults,
     use,
     mountComponents,
