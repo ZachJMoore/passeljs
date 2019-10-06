@@ -3,6 +3,16 @@
 
 Passel is an IoT framework made on top of NodeJs with built in local, global, and file system component state.
 
+#### trusted by
+<p align="center">
+<a href="https://github.com/ZachJMoore/smart-kiln-hardware">
+<img src="docs/images/trusted-by-smart-kiln.png" height="32" />
+</a>
+</p>
+
+
+## Getting Started
+
 #### Example Usage:
 
 For a working example, take a look at the example folder or run yarn dev in the root directory.
