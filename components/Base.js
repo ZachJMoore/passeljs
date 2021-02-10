@@ -35,15 +35,14 @@ class BaseComponent{
         // Set placeholder fsState max update limit variable
         this._fsState_recurrent_update_limit_interval = null
 
-        // if we are a child, make sure we have access to parent state changes
-        if (props.parent){
-            this.parentState = props.parent.state
-            this.parentStateChanged = props.parent.stateChanged
-        }
-
         // inherit props
         if (props.propsToInherit){
             this.props = props.propsToInherit
+        }
+
+        // Set parent
+        if (props.parent){
+            this._parent = props.parent
         }
     }
 
@@ -209,10 +208,7 @@ class BaseComponent{
     use(Comp, propsToInherit){
 
         let comp = new Comp({
-            parent: {
-                state: this.state,
-                stateChanged: this.stateChanged
-            },
+            parent: this,
             global: this.global,
             globalChanged: this.globalChanged,
             globalReservedTopLevelKeys: this._global_reserved_top_level_keys,
@@ -231,10 +227,24 @@ class BaseComponent{
         comp._component_depth = this._component_depth + 1
         comp._component_has_initialized = true
 
+        // if we are a child, make sure we have access to parent state changes
+        if (comp._parent){
+            comp.parentState = comp._parent.state
+            comp.parentStateChanged = comp._parent.stateChanged
+
+            if (this.options.fsState && comp.options.fsState){
+                comp.options.fsState = {
+                    ...comp.options.fsState,
+                    relativeFilePath: comp.options.fsState.relativeFilePath ? comp.options.fsState.relativeFilePath : this.options.fsState.relativeFilePath,
+                    absoluteFilePath: comp.options.fsState.absoluteFilePath ? comp.options.fsState.absoluteFilePath : this.options.fsState.absoluteFilePath
+                }
+            }
+        }
+
         if (comp.options && comp.options.fsState){
 
             // construct component store
-            const internalComponentFileStore = new InternalComponentStore(comp._component_path.join("/"))
+            const internalComponentFileStore = new InternalComponentStore({componentName: comp._component_path.join("/"), absoluteFilePath: comp.options.fsState.absoluteFilePath, relativeFilePath: comp.options.fsState.relativeFilePath})
             comp._internal_component_file_store = internalComponentFileStore
 
             // Load initial fsStore state into component or generate from default state

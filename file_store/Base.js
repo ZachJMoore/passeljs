@@ -1,5 +1,6 @@
 const fs = require("fs")
 const jetpack = require("fs-jetpack")
+const path = require("path")
 ROOT_APP_PATH = fs.realpathSync('.')
 
 class Base {
@@ -7,7 +8,7 @@ class Base {
 
     constructor(){
 
-        this.directory = jetpack.cwd(ROOT_APP_PATH + "/app/storage/")
+        this.directory = jetpack.cwd(path.join(ROOT_APP_PATH, "/app/storage/"))
 
     }
 

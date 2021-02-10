@@ -83,7 +83,7 @@ const use = (Comp, propsToInherit)=>{
     if (comp.options && comp.options.fsState){
 
         // construct component store
-        const internalComponentFileStore = new InternalComponentStore(comp.componentName)
+        const internalComponentFileStore = new InternalComponentStore({componentName: comp.componentName, absoluteFilePath: comp.options.fsState.absoluteFilePath, relativeFilePath: comp.options.fsState.relativeFilePath})
         comp._internal_component_file_store = internalComponentFileStore
 
         // Load initial fsStore state into component or generate from default state
