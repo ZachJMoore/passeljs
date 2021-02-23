@@ -1,11 +1,11 @@
 {
   "name": "passeljs",
-  "version": "2.4.4",
+  "version": "2.5.0",
   "description": "An IoT framework made on top of NodeJs with built in local, global, and file system component state.",
   "main": "index.js",
   "scripts": {
-    "dev": "cd examples && nodemon index.js",
-    "dev:inspect": "cd examples && nodemon index.js --inspect-brk"
+    "start:dev": "cd example && nodemon index.js --config nodemon.json",
+    "start:dev:inspect": "cd example && nodemon index.js --config nodemon.json --inspect-brk"
   },
   "repository": {
     "type": "git",

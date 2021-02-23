@@ -3,7 +3,10 @@ const Components = require("./components")
 const { InternalComponentStore } = require("./file_store")
 const helpers = require("./helpers.js")
 const _ = require("lodash")
-
+const reservedGlobalStateKeys = [
+    "_state",
+    "_change_list",
+  ];
 
 // global state
 const global = {}
@@ -28,7 +31,17 @@ const setGlobalDefaults = (object)=>{
     if (Array.isArray(object)) throw new Error("Global defaults requires an object. You passed an array")
     if (typeof object !== "object") throw new Error(`Global defaults requires an object. You passed an value with typeof: ${typeof object}`)
 
-    Object.keys(object).forEach(key=>{
+    let validKeyList = Object.keys(object).filter(function (key) {
+        let isAllowed = !reservedGlobalStateKeys.includes(key)
+        if (!isAllowed) {
+          console.warn(
+            `Value with key of '${key}' is reserved and will be discarded from state`
+          )
+        }
+        return isAllowed;
+    });
+
+    validKeyList.forEach(key=>{
         globalSetStateReservedKeys[key] = true
         global[key] = object[key]
     })
@@ -50,18 +63,36 @@ const setGlobal = (value, options) => {
 
     if (_.isEqual(value, global)) return
 
-    Object.keys(value).forEach((key)=>{
+    let globalChangeList = [];
+    let validKeyList = Object.keys(value).filter(function (key) {
+        let isAllowed = !reservedGlobalStateKeys.includes(key)
+        if (!isAllowed) {
+            console.warn(
+            `Value with key of '${key}' is reserved and will be discarded from state`
+            )
+        }
+        return isAllowed;
+    });
+
+    validKeyList.forEach((key)=>{
         if (!_.isEqual(value[key], global[key])){//if the value is different
 
             if (globalReservedTopLevelKeys[key]) throw new Error(`global.${key} is reserved for components`)
             if (globalSetStateReservedKeys[key] === undefined) throw new Error(`global.${key} default has not been defined. You must reserve keys with passel.setGlobalDefaults({...})`)
             // set global state
             global[key] = value[key]
-            // TODO: batch emitters until end to ensure all values are set before events are fired
-            globalChanged.emit(key, value[key])
+            globalChangeList.push({key, value: value[key] })
 
         }
     })
+
+    if (globalChangeList.length > 0) {
+        globalChanged.emit("_state", global);
+        globalChanged.emit("_change_list", globalChangeList.map(({key})=>key));
+        globalChangeList.forEach(({ key, value }) => {
+            globalChanged.emit(key, value);
+        });
+    }
 
     if (options.cb && typeof options.cb === "function") options.cb()
 }

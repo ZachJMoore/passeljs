@@ -5,6 +5,15 @@ const helpers = require("../helpers.js")
 const { InternalComponentStore } = require("../file_store")
 const _ = require("lodash")
 
+const reservedGlobalStateKeys = [
+    "_state",
+    "_change_list",
+  ];
+const reservedStateKeys = [
+    "_state",
+    "_change_list",
+  ];
+
 class BaseComponent{
     constructor(props){
 
@@ -68,18 +77,36 @@ class BaseComponent{
             if (_.isEqual(value, this.global)) return
         }
 
-        Object.keys(value).forEach((key)=>{
+        let globalChangeList = [];
+        let validKeyList = Object.keys(value).filter(function (key) {
+            let isAllowed = !reservedGlobalStateKeys.includes(key)
+            if (!isAllowed) {
+              console.warn(
+                `Value with key of '${key}' is reserved and will be discarded from state`
+              )
+            }
+            return isAllowed;
+        });
+
+        validKeyList.forEach((key)=>{
             if (!_.isEqual(value[key], this.state[key])){//if the value is different
 
                 if (this._global_reserved_top_level_keys[key]) throw new Error(`this.global.${key} is reserved for components`)
                 if (this._global_set_state_reserved_keys[key] === undefined) throw new Error(`this.global.${key} default has not been defined. You must reserve keys with passel.setGlobalDefaults({...})`)
                 // set global state
                 this.global[key] = value[key]
-                // TODO: batch emitters until end to ensure all values are set before events are fired
-                this.globalChanged.emit(key, value[key])
+                globalChangeList.push({key, value: value[key] })
 
             }
         })
+
+        if (globalChangeList.length > 0) {
+            this.globalChanged.emit("_state", this.global);
+            this.globalChanged.emit("_change_list", globalChangeList.map(({key})=>key));
+            globalChangeList.forEach(({ key, value }) => {
+                this.globalChanged.emit(key, value);
+            });
+        }
 
         if (options.cb && typeof options.cb === "function") options.cb()
     }
@@ -119,13 +146,26 @@ class BaseComponent{
             })
         }
 
-        Object.keys(value).forEach((key)=>{
+        let changeList = [];
+        let globalEmitList = []
+        let globalChangeList = []
+
+        let validKeyList = Object.keys(value).filter(function (key) {
+            let isAllowed = !reservedStateKeys.includes(key)
+            if (!isAllowed) {
+              console.warn(
+                `Value with key of '${key}' is reserved and will be discarded from state`
+              )
+            }
+            return isAllowed;
+          });
+
+        validKeyList.forEach((key)=>{
             if (!_.isEqual(value[key], this.state[key])){ //if the value is different
 
                 // set component state
                 this.state[key] = value[key]
-                // TODO: batch emitters until end to ensure all values are set before events are fired
-                this.stateChanged.emit(key, value[key])
+                changeList.push({key, value: value[key] })
 
                 if (!this.options) return
 
@@ -137,8 +177,10 @@ class BaseComponent{
                         let temp = {}
                         if (!globalPath) globalPath = helpers.createObjectPath(this._component_path, temp)
                         globalPath[object.key] = this.state[object.key]
-                        // TODO: batch emitters until end to ensure all values are set before events are fired
-                        if (object.emit) this.globalChanged.emit((this._component_path.join(".") + "." + object.key), this.state[object.key])
+                        if (object.emit) {
+                            globalEmitList.push({key: (this._component_path.join(".") + "." + object.key), value: this.state[object.key]})
+                        }
+                        globalChangeList.push({key: (this._component_path.join(".") + "." + object.key), value: this.state[object.key]})
                         _.merge(this.global, temp)
 
                     }
@@ -189,6 +231,25 @@ class BaseComponent{
                 // update file system
                 this._internal_component_file_store.setState(fsState, options.atomic)
             }
+        }
+
+        if (changeList.length > 0) {
+            this.stateChanged.emit("_state", this.state);
+            this.stateChanged.emit("_change_list", changeList.map(({key})=>key));
+            changeList.forEach(({ key, value }) => {
+              this.stateChanged.emit(key, value);
+            });
+        }
+
+        if (globalChangeList.length > 0){
+            this.globalChanged.emit("_change_list", globalChangeList.map(({key})=>key))
+        }
+        
+        if (globalEmitList.length > 0) {
+            this.globalChanged.emit("_state", this.global);
+            globalEmitList.forEach(({ key, value }) => {
+              this.globalChanged.emit(key, value);
+            });
         }
 
         if (options.cb && typeof options.cb === "function") options.cb()
