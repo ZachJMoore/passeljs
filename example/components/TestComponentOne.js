@@ -41,13 +41,18 @@ class TestComponentOne extends Components.Base {
 
   componentWillMount(){
     this.use(TestComponentChild)
+
+
+    this.stateChanged.on("count", count=>console.log({count}))
+    this.stateChanged.on("_state", _state=>console.log({_state}))
+    this.stateChanged.on("_change_list", _change_list=>console.log({_change_list}))
+
   }
 
   componentDidMount() {
 
     setInterval(()=>{
         this.setState({count: this.state.count + 1})
-        console.log({count: this.state.count})
     }, 2*1000)
 
   }
