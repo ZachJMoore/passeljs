@@ -6,7 +6,7 @@ const _ = require("lodash")
 const reservedGlobalStateKeys = [
     "_state",
     "_change_list",
-  ];
+];
 
 // global state
 const global = {}
@@ -25,7 +25,7 @@ let hasInitialized = false
 let hasMounted = false
 
 // set global defaults
-const setGlobalDefaults = (object)=>{
+const setGlobalDefaults = (object) => {
     if (hasInitialized) throw new Error("You must set global defaults before calling passel.use(...)")
     if (hasMounted) throw new Error("You must set global defaults before mounting components")
     if (Array.isArray(object)) throw new Error("Global defaults requires an object. You passed an array")
@@ -34,14 +34,14 @@ const setGlobalDefaults = (object)=>{
     let validKeyList = Object.keys(object).filter(function (key) {
         let isAllowed = !reservedGlobalStateKeys.includes(key)
         if (!isAllowed) {
-          console.warn(
-            `Value with key of '${key}' is reserved and will be discarded from state`
-          )
+            console.warn(
+                `Value with key of '${key}' is reserved and will be discarded from state`
+            )
         }
         return isAllowed;
     });
 
-    validKeyList.forEach(key=>{
+    validKeyList.forEach(key => {
         globalSetStateReservedKeys[key] = true
         global[key] = object[key]
     })
@@ -56,7 +56,7 @@ const setGlobal = (value, options) => {
 
     if (!value) return
 
-    if (typeof value === "function"){
+    if (typeof value === "function") {
         value = value(_.cloneDeep(global))
         if (!value) return
     }
@@ -68,27 +68,27 @@ const setGlobal = (value, options) => {
         let isAllowed = !reservedGlobalStateKeys.includes(key)
         if (!isAllowed) {
             console.warn(
-            `Value with key of '${key}' is reserved and will be discarded from state`
+                `Value with key of '${key}' is reserved and will be discarded from state`
             )
         }
         return isAllowed;
     });
 
-    validKeyList.forEach((key)=>{
-        if (!_.isEqual(value[key], global[key])){//if the value is different
+    validKeyList.forEach((key) => {
+        if (!_.isEqual(value[key], global[key])) {//if the value is different
 
             if (globalReservedTopLevelKeys[key]) throw new Error(`global.${key} is reserved for components`)
             if (globalSetStateReservedKeys[key] === undefined) throw new Error(`global.${key} default has not been defined. You must reserve keys with passel.setGlobalDefaults({...})`)
             // set global state
             global[key] = value[key]
-            globalChangeList.push({key, value: value[key] })
+            globalChangeList.push({ key, value: value[key] })
 
         }
     })
 
     if (globalChangeList.length > 0) {
         globalChanged.emit("_state", global);
-        globalChanged.emit("_change_list", globalChangeList.map(({key})=>key));
+        globalChanged.emit("_change_list", globalChangeList.map(({ key }) => key));
         globalChangeList.forEach(({ key, value }) => {
             globalChanged.emit(key, value);
         });
@@ -98,10 +98,10 @@ const setGlobal = (value, options) => {
 }
 
 // initialize new top level components
-const use = (Comp, propsToInherit)=>{
+const use = (Comp, propsToInherit) => {
     if (hasMounted) throw new Error("You must initialized components before calling passel.mountComponents()")
 
-    const comp = new Comp({global, globalChanged, propsToInherit, initializedComponents, exposedComponentFunctions, globalReservedTopLevelKeys, globalSetStateReservedKeys})
+    const comp = new Comp({ global, globalChanged, propsToInherit, initializedComponents, exposedComponentFunctions, globalReservedTopLevelKeys, globalSetStateReservedKeys })
 
     if (!comp.componentName) comp.componentName = comp.__proto__.constructor.name
     if (initializedComponents[comp.componentName]) throw new Error(`Component name '${comp.componentName}' is already used. Duplicate names not allowed`)
@@ -111,37 +111,35 @@ const use = (Comp, propsToInherit)=>{
     comp._component_depth = 0
     comp._component_has_initialized = true
 
-    if (comp.options && comp.options.fsState){
+    if (comp.options && comp.options.fsState) {
 
         // construct component store
-        const internalComponentFileStore = new InternalComponentStore({componentName: comp.componentName, absoluteFilePath: comp.options.fsState.absoluteFilePath, relativeFilePath: comp.options.fsState.relativeFilePath})
+        const internalComponentFileStore = new InternalComponentStore({ componentName: comp.componentName, absoluteFilePath: comp.options.fsState.absoluteFilePath, relativeFilePath: comp.options.fsState.relativeFilePath })
         comp._internal_component_file_store = internalComponentFileStore
 
         // Load initial fsStore state into component or generate from default state
         const fsState = internalComponentFileStore.getState()
-        if (fsState) comp.state = {...comp.state, ...fsState}
-        else {
-            let data = {}
-            comp.options.fsState.options.include.forEach(object=>{
-                data[object.key] = comp.state[object.key]
-            })
-            internalComponentFileStore.setState(data)
-        }
+        let data = {}
+        comp.options.fsState.options.include.forEach(object => {
+            data[object.key] = fsState[object.key] || comp.state[object.key]
+        })
+        if (fsState) comp.state = { ...comp.state, ...data }
+        internalComponentFileStore.setState(data)
     }
 
-    if (comp.options && comp.options.globalState){
+    if (comp.options && comp.options.globalState) {
         if (globalSetStateReservedKeys[comp.componentName] !== undefined) throw new Error(`this.global.${comp.componentName} is already reserved for default global state. Component '${comp.componentName}' needs to change its componentName or this.setGlobal must be used manually rather than having passel do it automatically`)
         globalReservedTopLevelKeys[comp.componentName] = true
         // load initial global state
-        comp.options.globalState.options.include.forEach(object=>{
+        comp.options.globalState.options.include.forEach(object => {
             if (!global[comp.componentName]) global[comp.componentName] = {}
             global[comp.componentName][object.key] = comp.state[object.key]
         })
     }
 
-    if (comp.options && comp.options.exposeFunctions){
+    if (comp.options && comp.options.exposeFunctions) {
         // expose component functions
-        comp.options.exposeFunctions.options.include.forEach(object=>{
+        comp.options.exposeFunctions.options.include.forEach(object => {
 
             let pathRef = helpers.resolveObjectPath(comp._component_path, exposedComponentFunctions)
             let temp = {}
@@ -165,10 +163,10 @@ const use = (Comp, propsToInherit)=>{
 }
 
 // mount components
-const mountComponents = ()=>{
+const mountComponents = () => {
     if (!hasInitialized) throw new Error("There are no components to mount. Maybe you forgot to call passel.use(...)")
-    let mount = (object)=>{
-        Object.values(object).forEach((comp)=>{
+    let mount = (object) => {
+        Object.values(object).forEach((comp) => {
             comp.component._component_has_mounted = true
             comp.component.componentDidMount()
             if (comp.children) mount(comp.children)
