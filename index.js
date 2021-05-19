@@ -121,7 +121,7 @@ const use = (Comp, propsToInherit) => {
         const fsState = internalComponentFileStore.getState()
         let data = {}
         comp.options.fsState.options.include.forEach(object => {
-            data[object.key] = fsState[object.key] || comp.state[object.key]
+            data[object.key] = fsState ? fsState[object.key] || comp.state[object.key] : comp.state[object.key]
         })
         if (fsState) comp.state = { ...comp.state, ...data }
         internalComponentFileStore.setState(data)
